@@ -1,0 +1,588 @@
+---
+title: "Final Report"
+date: "2022-11-04"
+output: 
+  html_document:
+      toc: true
+      toc_float: true
+---
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(include = FALSE) 
+knitr::opts_chunk$set(fig.width = 9.1)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+<br>
+<br>
+
+## 1. Introduction
+
+---
+
+Established in 2016, Cyclistic is a bike-share offering service located in Chicago, USA. Cyclistic currently offers more than 5,800 bicycles that are geo-tracked and locked into a network of over 690 stations across Chicago. The bikes can be unlocked from one station and returned to another station in the system anytime.
+
+Cyclistic offers 3 pricing plans, single-ride passes, full-day passes and annual memberships. Customer who purcharse single-ride passes or full-day passes are referred to as casual users. Customers who purchase annual membership are members
+
+The Cyclistic team have recently concluded that annual memberships are more profitable than casual riders. Furthermore, the team have noted that while 30% of users use the bikes for their work commute, the majority of Cyclistic users ride for leisure. This report will assess how Cyclistic annual members and casual riders use bikes differently.
+<br>
+<br>
+
+## 2. Process
+
+---
+
+Cyclistic releases data on a monthly basis in csv format, for the purpose of this analysis data from October 2021 to September 2022 it's being used. Due to privacy issues there is no data related to the users (like past purchases or location).
+
+Each dataset contains between 100,000-830,000 rows. Due to the size of the data R and RStudio were used to process and analyze it.
+
+The datasets were imported to R and merged into one big dataframe consisting of more than 5.8 million rows. Some columns were added to allow aggregation by month, day, day of week, hour and ride length. The data was then cleaned by removing negative ride lengths and ride lengths below 60 seconds. All entries for docked bikes were also removed, since this analysis is focused on differences between members and casual users, and it seems members are treated as casual users when using docked bikes.
+<br>
+<br>
+
+## 3. Analysis
+
+---
+
+```{r}
+# Load libraries
+library(tidyverse)
+library(lubridate)
+library(leaflet)
+library(viridis)
+library(nombre)
+library(ggpubr)
+
+# Set scipen so plots don't show in scientific notation 
+options(scipen = 1000000000)  
+
+# Load dataset
+cleaned_data <- read.csv("/home/jeffer/Documents/Data Analysis Portfolio/Cyclistic_Case_Study/Data/cleaned_data.csv")
+```
+
+### 3.1 Number of rides and average duration by month
+
+```{r}
+## Number of rides and average duration by month and rider type
+df_month <- cleaned_data %>%
+  group_by(member_casual, month) %>%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length)) %>%
+  arrange(month) 
+
+# Create visualization for number of rides by month  
+vis_month <- df_month %>% 
+  ggplot(aes(reorder(month, (((as.integer(month) + 2) %% 12) + 1)), 
+             number_of_rides, 
+             fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Month", y = "Number of Rides") +
+  scale_fill_viridis(discrete = T, 
+                     name = "Rider Type", labels=c('Casual', 'Member')) + 
+  scale_y_continuous(breaks = seq(25000, 450000, 50000)) + 
+  geom_vline(xintercept = 3.5) +
+  geom_text(aes(x = 3.5, y = 225000,  label = "2022"), 
+            angle = 90, size = 7, check_overlap = T, vjust = 1.2) +
+  theme_bw()
+
+# Create visualization for average duration of rides by month  
+vis_month2 <- df_month %>% 
+  ggplot(aes(reorder(month, (((as.integer(month) + 2) %% 12) + 1)), 
+             average_duration, 
+             fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x = "Month", y = "Number of Rides") +
+  scale_fill_viridis(discrete = T, 
+                     name = "Rider Type", labels=c('Casual', 'Member')) + 
+  geom_vline(xintercept = 3.5) +
+  geom_text(aes(x = 3.5, y = 1450,  label = "2022"), 
+            angle = 90, size = 7, check_overlap = T, vjust = 1.2) +
+  theme_bw()
+```
+
+```{r, include = TRUE}
+# Plot the two visualizations by month together 
+ggarrange(vis_month, vis_month2, common.legend = T, legend = "bottom")
+```
+
+*Note : Since the data used in this analysis represent just one year, we can't accurately look for yearly trends. This section of the analysis is only valid as far as data from several previous years are similar.*
+
+User rides are higher than casual rides in any month. The worst months of the year for Cyclistic are January and February. The most popular time of year are the summer months where the number of rides reaches more than 15 times and more than 5 times the number of rides in January for casual user and members respectively. This highlights Cyclistic's team findings that the most part of users ride for leisure.
+
+There seems to be a lot of seasonality for both type of users but still members use the service more consistently throughout the year. Also, while casual rides went down on August, member rides continued rising until September.
+
+### 3.2 Number of rides and average duration by day of week
+
+```{r}
+# See the average ride time and number of rides by each day for members vs casual users
+cleaned_data %>%
+  group_by(member_casual, day_of_week) %>%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length)) %>%
+  arrange(day_of_week)
+
+# The days of the week are out of order. Let's fix that.
+# Convert "day_of_week" to ordered vector 
+cleaned_data$day_of_week <- wday(cleaned_data$started_at, label = TRUE) 
+
+## Number of rides and average duration by day of week and rider type
+df_week <- cleaned_data %>%
+  group_by(member_casual, day_of_week) %>%
+  summarise(number_of_rides = n(),
+            average_duration =  mean(ride_length),
+            total_duration = sum(ride_length)) %>%
+  arrange(day_of_week) %>%
+  ungroup() %>%
+  mutate(number_of_rides_percent = (number_of_rides / sum(number_of_rides)))
+
+# Create table to use for plot legend
+totals <- df_week %>%
+  group_by(member_casual) %>%
+  summarise(total = sum((number_of_rides_percent)))
+
+# Visualize number of rides by day of week and rider type
+vis_week <- df_week %>% 
+  ggplot(aes(x = day_of_week, y = number_of_rides_percent, 
+             fill = member_casual, color = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(x ="Day of Week", y = "Total Rides (percentage)") +
+  scale_y_continuous(breaks = seq(0.01,0.10, 0.01), 
+                     labels = scales::percent_format(scale = 100)) +
+  theme_bw() +
+  theme(legend.title = element_text(size = 15),
+        legend.text = element_text(size = 10)) +
+  ggtitle("Number of rides by day of week") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_viridis(discrete = T, 
+                      name = "Total Rides (%)", 
+                      labels = paste(c("Casual:", "Member:"), 
+                                     scales::percent(totals$total))) +
+  scale_fill_viridis(discrete = T,
+                     name = "Rider Type", labels=c('Casual', 'Member'))
+
+# Visualize average duration by day of week and rider type
+vis_week2 <- df_week %>% 
+  ggplot(aes(x = day_of_week, y = average_duration, 
+             fill = member_casual, color = member_casual)) +
+  geom_col(position = "dodge") +
+  xlab("Day of week") +
+  ylab("Average duration (seconds)") +
+  theme_bw() +
+  ggtitle("Average ride duration by day of week") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_viridis(discrete = T, 
+                      name = "Total Rides (%)", 
+                      labels = paste(c("Casual:", "Member:"), 
+                                     scales::percent(totals$total))) +
+  scale_fill_viridis(discrete = T,
+                     name = "Rider Type", labels=c('Casual', 'Member')) +
+  scale_y_continuous(breaks = seq(0, 1500, 250))
+```
+
+```{r, include = TRUE}
+# Plot the two visualizations by week together 
+ggarrange(vis_week2, vis_week, ncol=2, common.legend = TRUE, legend = "bottom") 
+```
+
+Members and casual users make 61% and 39% of the rides respectively. The number of rides for members goes down on weekends (but its still higher than for casual users), while the number of rides for casual goes up a lot. That suggest that while members also use the service for leisure, a lot of them use it mainly for their daily mobility needs like commute to work. Casual users use it mostly for leisure.
+
+The average ride duration is always higher for casual riders, this also shows that casual riders are using the service for leisure much more than members
+
+### 3.3 Most popular time of day
+
+```{r}
+## Number of rides and average trip duration by rider type, hour and day of week
+df_hour <- cleaned_data %>%
+  group_by(member_casual, day_of_week, hour) %>%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length),
+            total_duration= sum(ride_length)) %>%
+  arrange(day_of_week, hour) %>%
+  ungroup() %>%
+  mutate(number_of_rides_percent = (number_of_rides/sum(number_of_rides)))
+
+# Create table to use for plot legend
+totals_hour <- df_hour %>%
+  filter(!(day_of_week %in% c("Sun","Sat"))) %>%
+  group_by(member_casual) %>%
+  summarise(total = sum(number_of_rides_percent))
+
+# Create table to use for plot legend
+totals_hour2 <- df_hour %>%
+  filter(day_of_week %in% c("Sun","Sat")) %>%
+  group_by(member_casual) %>%
+  summarise(total = sum(number_of_rides_percent))
+
+# Visualize number of rides by user type and hour (Monday to Friday)
+vis_hour <- df_hour %>%
+  filter(!(day_of_week %in% c("Sun","Sat"))) %>%
+  ggplot(aes(x = hour, y = number_of_rides_percent, 
+             fill = member_casual, colour = member_casual)) +
+  scale_fill_viridis(discrete = T, name = "Rider Type", 
+                     labels=c('Casual', 'Member')) +
+  scale_color_viridis(discrete = T,name = "Total Rides (%)",
+                      labels = paste(c("Casual:", "Member:"), 
+                                     scales::percent(totals_hour$total))) +
+  labs(x ="Hour", y = "% of Total Week Rides") +
+  geom_col(position = "dodge") +
+  scale_y_continuous(breaks = seq(0.001,0.10, 0.002), labels = 
+                       scales::percent_format(scale = 100)) +
+  theme_bw() +
+  ggtitle("Number of rides by hour (Monday to Friday)") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Visualize number of rides by user type and hour (Saturday and Sunday)
+vis_hour2 <- df_hour %>%
+  filter(day_of_week %in% c("Sun","Sat")) %>%
+  ggplot(aes(x = hour, y = number_of_rides_percent, 
+             fill = member_casual, color = member_casual)) +
+  scale_fill_viridis(discrete = T, name = "Rider Type", 
+                     labels=c('Casual', 'Member')) +
+  scale_color_viridis(discrete = T,name = "Total Rides (%)",
+                      labels = paste(c("Casual:", "Member:"), 
+                                     scales::percent(totals_hour2$total))) +
+  labs(x ="Hour", y = "% of Total Week Rides") +
+  geom_col(position = "dodge") +
+  scale_y_continuous(breaks = seq(0.001,0.10, 0.002), labels = 
+                       scales::percent_format(scale = 100)) +
+  theme_bw() +
+  ggtitle("Number of rides by hour (Saturday and Sunday)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  guides(fill  = guide_legend(order = 1),
+         color = guide_legend(order = 2))
+```
+
+```{r, include = TRUE}
+# Plot visualizations by hour together
+ggarrange(vis_hour, vis_hour2, ncol = 1, common.legend = F, legend = "bottom")
+```
+
+Between Monday and Friday there are two spikes in the number of rides for members, one at 07:00-08:00 where people go to work and a bigger one between 16:00-18:00 (being at its highest at 17:00), where people get out of work. That confirms that members use the service a lot for their daily mobility needs. For casual users the number of rides is much lower and it goes up slowly during the day, with its highest value at 17:00.
+
+On weekends the number of rides per hour are pretty much the same for members and casual users.
+
+Looking at the average duration of rides by hour, the lowest value for casual riders is higher than the highest value for members.
+
+### 3.4 Number of rides by day
+
+```{r}
+## Number of rides and average duration by date
+df_date <- cleaned_data %>%
+  group_by(member_casual, date) %>%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length),
+            total_duration = sum(ride_length)) %>%
+  arrange(date) 
+
+# Statistical summary of some values by rider type
+df_date %>%
+  group_by(member_casual) %>%
+  summarise(average_number_of_rides = mean(number_of_rides),
+            max_number_of_rides =  max(number_of_rides),
+            median_number_of_rides =  median(number_of_rides),
+            min_number_of_rides =  min(number_of_rides),
+            average_total_duration = mean(total_duration),
+            max_total_duration = max(total_duration),
+            min_total_duration = min(total_duration),
+            max_average_duration = max(average_duration),
+            min_average_duration = min(average_duration),
+            median_average_duration = median(average_duration))
+
+# See the days of the year with the highest number of rides
+df_date %>%
+  arrange(-number_of_rides) %>%
+  print(n=100)
+
+# Visualize boxplot for number of rides by rider type
+vis_date <- df_date %>%
+  ggplot(aes(member_casual, number_of_rides, fill = member_casual)) +
+  geom_boxplot(outlier.colour = "blue") +
+  scale_fill_viridis(discrete = T, name = "Rider Type",
+                     labels=c('Casual', 'Member')) +
+  labs(x = "Rider Type", y = "Number of Rides") +
+  stat_summary(fun = mean, geom = "point", col = "red") +
+  stat_summary(fun = mean, geom = "text", col = "red",  
+               vjust = 1.5, aes(label = paste("Mean:", round(..y.., digits = 1)))) +
+  scale_y_continuous(breaks = seq(0, 200000, 2500)) +
+  theme_bw()
+```
+
+```{r, include = TRUE}
+vis_date
+```
+
+The number of rides for casual riders has a lot more variance, having the highest and the lowest values in the year.
+
+In general there are more member than casual rides, but there are some days (mainly between May and August) where this is not the case.
+
+### 3.5 Use of different types of bikes
+
+```{r}
+## Use of different bike types by rider type
+bikes <- cleaned_data %>%
+  group_by(member_casual, rideable_type) %>%
+  summarise(number_of_rides = n(), 
+            average_duration = mean(ride_length),
+            total_duration = sum(ride_length)) %>%
+  arrange(member_casual)
+
+# Visualize number of rides by bike type for members
+vis_bikes <- bikes %>%
+  filter(member_casual == "member") %>%
+  mutate(number_of_rides_percent = number_of_rides / sum(number_of_rides)) %>%
+  ggplot(aes(x ="", y = number_of_rides, fill = rideable_type)) +
+  geom_bar(stat="identity", width = 1) +
+  scale_fill_viridis(discrete = T, name = "Bike Type", 
+                     labels=c('Classic', 'Electric')) +
+  coord_polar("y", start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(number_of_rides_percent)),
+            colour = c("white","black"),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle("Members") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+# Visualize number of rides by bike type for casual riders
+vis_bikes2 <- bikes %>%
+  filter(member_casual == "casual") %>%
+  mutate(number_of_rides_percent = number_of_rides / sum(number_of_rides)) %>%
+  ggplot(aes(x ="", y = number_of_rides, fill = rideable_type)) +
+  geom_bar(stat="identity", width = 1) +
+  scale_fill_viridis(discrete = T, name = "Bike Type", 
+                     labels=c('Classic', 'Electric')) +
+  coord_polar("y", start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(number_of_rides_percent)),
+            colour = c("white","black"),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle("Casual Users") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Visualize total use (in seconds) by bike type for members
+vis_bikesx <- bikes %>%
+  filter(member_casual == "member") %>%
+  mutate(total_duration_percent = total_duration / sum(total_duration)) %>%
+  ggplot(aes(x ="", y = total_duration, fill = rideable_type)) +
+  geom_bar(stat="identity", width = 1) +
+  scale_fill_viridis(discrete = T, name = "Bike Type", 
+                     labels=c('Classic', 'Electric')) +
+  coord_polar("y", start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(total_duration_percent)),
+            colour = c("white","black"),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle("Members") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Visualize total use (in seconds) by bike type for casual riders
+vis_bikesx2 <- bikes %>%
+  filter(member_casual == "casual") %>%
+  mutate(total_duration_percent = total_duration / sum(total_duration)) %>%
+  ggplot(aes(x ="", y = total_duration, fill = rideable_type)) +
+  geom_bar(stat="identity", width = 1) +
+  scale_fill_viridis(discrete = T, name = "Bike Type", 
+                     labels=c('Classic', 'Electric')) +
+  coord_polar("y", start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(total_duration_percent)),
+            colour = c("white","black"),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle("Casual Users") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Arrange both visualizations for number of rides by bike together and add a title
+p <- ggarrange(vis_bikes, vis_bikes2, ncol = 2, legend = "none") %>%
+  annotate_figure(top = text_grob("Number of rides by bike type (%)",
+                                  size = 14))
+
+# Arrange both visualizations for total duration by bike together and add a title
+p2 <- ggarrange(vis_bikesx, vis_bikesx2, ncol = 2, 
+                common.legend = TRUE, legend = "bottom") %>%
+  annotate_figure(top = text_grob("Total trip time by bike type (%)",
+                                  size = 14))
+
+```
+
+```{r, include = TRUE}
+# Plot visualizations by bike type
+ggarrange(p, p2, ncol = 1)
+```
+
+Members use more classic bikes (52.8% of their rides) than electric bikes. casual users use more electric bikes (57% of their rides) than classic bikes.
+
+The average duration of rides in electric bikes it's 714 for members and 1031 for casual riders. The average duration in classic bikes is 842 for members and 1756 for casual riders. This shows that, on average, the time people spend on a ride increases when using classic bikes. What's interesting its that this increase in duration is much more pronounced for casual riders with a 70% increase vs 18% for members.
+
+This result in both type of riders having almost the same proportions of their total ride time by bike type, despite casual users making less rides in classic bikes.
+
+### 3.6 Most popular routes
+
+```{r}
+## Visualize most popular routes
+routes <- cleaned_data %>%
+  mutate(route = paste(start_station_name, "-", end_station_name)) %>%
+  group_by(route, member_casual) %>%
+  summarise(total = n()) %>%
+  arrange(desc(total)) %>%
+  ungroup()
+
+# Rows 1 and 2 are "NA - NA" so this rides don't have a start nor end station 
+sum(routes$total[c(1,2)]) / nrow(cleaned_data) * 100
+# 8.54% of rides don't have a start station name nor end station name
+
+# Remove those 2 rows
+routes <- routes[-c(1, 2),]
+
+# Create a column with the sum of the number of rides for members and casual 
+# riders by station
+routes <- routes %>%
+  group_by(route) %>%
+  mutate(total_total = sum(total)) %>%
+  arrange(-total_total)
+  
+# Visualize 10 most popular routes by number of rides 
+vis_routes <- routes %>%
+  ungroup() %>%
+  head(20) %>%
+  ggplot(aes(y = route,
+             x = total, fill = total,
+             alpha = member_casual,
+             color = member_casual,
+             group = member_casual)) +
+  geom_col() +
+  scale_fill_viridis(discrete = F, begin = 0.20, end = 0.75, direction = -1,
+                     name = "Total") +
+  scale_color_viridis(option = "D", discrete = T, begin = 0, end = 1,
+                      name = "Rider Type", labels=c('Casual', 'Member')) +
+  scale_y_discrete(limits = unique(routes$route[seq(20, 1)])) +
+  scale_alpha_manual(values=c(0.6, 1), name = "Rider Type",
+                     labels=c('Casual', 'Member')) +
+  theme_bw() + 
+  ggtitle("Most popular routes") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Number of rides", y = "Route")
+```
+
+```{r, include = TRUE}
+vis_routes
+```
+
+### 3.7 Rides by station
+
+```{r}
+## Create Map with stations by number of rides
+
+# Create dataframe with the number of rides by station and their locations
+map_data <- cleaned_data %>%
+  group_by(start_station_name) %>%
+  arrange(date) %>%
+  summarise(lng = first(start_lng),
+            lat = first(start_lat), 
+            first_ride = first(date),
+            number_of_rides = n()) %>%
+  arrange(-number_of_rides) 
+
+map_data
+
+# Remove first column (NA)
+map_data <- map_data[-1,]
+
+# Create dataframe with the number of rides by station and their locations 
+# including only rides from members. Will be used for labels
+map_data_member <- cleaned_data %>%
+  filter(member_casual == "member") %>%
+  group_by(start_station_name, member_casual) %>%
+  arrange(date) %>%
+  summarise(lng = first(start_lng),
+            lat = first(start_lat), 
+            number_of_rides = n()) %>%
+  arrange(-number_of_rides) 
+
+# Create dataframe with the number of rides by station and their locations 
+# including only rides from casual riders. Will be used for labels
+map_data_casual <- cleaned_data %>%
+  filter(member_casual == "casual") %>%
+  group_by(start_station_name, member_casual) %>%
+  arrange(date) %>%
+  summarise(lng = first(start_lng),
+            lat = first(start_lat), 
+            number_of_rides = n()) %>%
+  arrange(-number_of_rides) 
+
+# Create labels to be used on the map
+labels <- paste(
+  "<strong>", map_data$start_station_name, 
+  "</strong><br>Number of Rides:", map_data$number_of_rides,
+  "</strong><br>Number of Rides (Casual):", scales::percent(
+    map_data_casual$number_of_rides[
+      match(map_data$start_station_name, map_data_casual$start_station_name)]
+    / map_data$number_of_rides, accuracy = 4),
+  "</strong><br>Number of Rides (Member):", scales::percent(
+    map_data_member$number_of_rides[
+      match(map_data$start_station_name, map_data_member$start_station_name)] 
+    / map_data$number_of_rides, accuracy = 4),
+  "</strong><br>", nom_ord(which(map_data$start_station_name == 
+                                   map_data$start_station_name), cardinal = F),
+  "Station by number of rides",
+  "</strong><br>First Ride in Time Period:", map_data$first_ride
+) %>%
+  lapply(htmltools::HTML)
+
+# Set domain and color palette viridis. reverse = T to make higher values darker 
+pal <- colorNumeric(
+  palette = 'viridis',
+  domain = seq(10, 64010, 1000),
+  reverse = T)
+
+# Create map
+map <- leaflet(map_data) %>% 
+  setView(lng = -87.623177, lat = 41.881832, zoom = 11) %>%
+  addCircleMarkers(radius = ~sqrt(sqrt(number_of_rides)), 
+                   label = ~labels,
+                   color = ~pal(number_of_rides)) %>% 
+  addMarkers(data = head(map_data, 10),
+             label = head(labels, 10)) %>%
+  addTiles() %>%
+  addLegend("topright",
+            pal = pal, 
+            values = c(seq(10, 64010, 1000), NA),
+            title = "Number of Rides",
+            na.label = "<10",
+            labels = c("blue", "red", "green","pink"),
+            opacity = 1,)
+
+# There is a warning saying some values will be treated as NA, this is expected.
+# NA values will be used to show stations with less than 10 rides with other color.
+# NA not showing correctly in the legend
+css_fix <- "div.info.legend.leaflet-control br {clear: both;}" # CSS to correct spacing
+html_fix <- htmltools::tags$style(type = "text/css", css_fix)  # Convert CSS to HTML
+```
+
+```{r, include = TRUE}
+map %>% htmlwidgets::prependContent(html_fix)
+```
+
+Despite Cyclistic having stations covering a wide area of Chicago, most popular stations are concentrated close to the shoreline. Cyclistic's most popular station is by far Streeter Dr & Grand Ave with 62237 rides, 65% more than the second most popular station. The least popular stations are at the south and west, with a lot of stations having less than 10 rides (Although it's worth noting that a lot of these stations seem to be relatively new, judging by the date of the first ride recorded in the time period analyzed). This also reflects the fact that most Cyclistic users ride for leisure.
+<br>
+<br>
+
+## 4. Recommendations
+
+---
+
+### 4.1 Offer a discount for new members
+
+The most relevant difference on how members and casual riders use Cyclistic bikes differently seems to be that members use it a lot for their everyday life while casual riders don't.
+
+Offering a discount will encourage more people, mainly those who already use Cyclistic, to buy an annual membership. If they end up using the service for their daily activities like a lot of members do, then they're likely to keep paying for the subscription and if they don't use the service for their daily activities they will most likely use the service less than the average for members, so they will not be less profitable for Cyclistic than other members despite the discount.
+
+### 4.2 A marketing campaign highligthing how Cyclistic integrate in the daily life of Chicag locals
+
+A marketing campaign highligthing on how Cyclistic is integrated in the daily life of a lot of Chicago locals, showing what benefits they get from it (e.g. skipping traffic, doing exercise, the convenience of having stations in all the city, etc) and how others could also benefit from integrating Cyclistic in their life over only using it sometimes for leisure. Also highligthing how casual riders who already use the service a lot can benefit in terms of price.
+
+### 4.3 Gather more data by conducting polls on customers
+
+By conducting polls on customers Cyclistic could gain more insights on what its customers think about Cyclistic, what do they like most about it?, what, if anything,they don't like?, how much they use the service and for which purposes?, why don't casual users buy a membership?, what would make them more likely to become members?. For instance maybe some users would buy a 6 month membership but not an annual membership, Cyclistic financial team could analyze, taking seasonality into account if that would be profitable at what price should it be. Maybe some important amount of casual users are tourist and Cyclistic wants to take that into account since they can't convert tourist to annual members.
+
+### 4.4 Take seasonality into account
+
+Analyze data from previous years to see if yearly trends found in the analysis are consistent. That, with some other data could like the number of tourist, could be used to make decisions, like doing most marketing campaigns in the summer months where the number of casual riders is much higher.

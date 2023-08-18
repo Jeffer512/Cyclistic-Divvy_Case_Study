@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Code</title>
+
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Cyclistic Case Study</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Final_Report.html">Final Report</a>
+</li>
+<li>
+  <a href="Code.html">Code</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Code</h1>
+
+</div>
+
+
+<hr />
+<p><br></p>
+<div id="process-data" class="section level2">
+<h2>Process Data</h2>
+<pre class="r"><code># Load libraries
+library(tidyverse)
+library(lubridate)
+library(janitor)
+
+# Set working directory to the data directory
+setwd(&quot;/home/jeffer/Documents/Data Analysis Portfolio/Cyclistic_Case_Study/Data/&quot;)
+
+# Load datasets into dataframes
+dt1 &lt;- read_csv(&quot;202110-divvy-tripdata.csv&quot;)
+dt2 &lt;- read_csv(&quot;202111-divvy-tripdata.csv&quot;)
+dt3 &lt;- read_csv(&quot;202112-divvy-tripdata.csv&quot;)
+dt4 &lt;- read_csv(&quot;202201-divvy-tripdata.csv&quot;)
+dt5 &lt;- read_csv(&quot;202202-divvy-tripdata.csv&quot;)
+dt6 &lt;- read_csv(&quot;202203-divvy-tripdata.csv&quot;)
+dt7 &lt;- read_csv(&quot;202204-divvy-tripdata.csv&quot;)
+dt8 &lt;- read_csv(&quot;202205-divvy-tripdata.csv&quot;)
+dt9 &lt;- read_csv(&quot;202206-divvy-tripdata.csv&quot;)
+dt10 &lt;- read_csv(&quot;202207-divvy-tripdata.csv&quot;)
+dt11 &lt;- read_csv(&quot;202208-divvy-tripdata.csv&quot;)
+dt12 &lt;- read_csv(&quot;202209-divvy-publictripdata.csv&quot;)
+
+# Check whether the set of data.frames are row-bindable.
+# Returns TRUE if there are no mis-matching rows (name and data type)
+compare_df_cols_same(dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11, dt12)
+
+# Stack individual data frames into one data frame
+all_trips &lt;- bind_rows(dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11, dt12)
+
+# Clean Data
+
+# Inspect the new table that has been created
+colnames(all_trips)  #List of column names
+dim(all_trips)  #Dimensions of the data frame (# of rows and columns)
+head(all_trips)  #See the first 6 rows of data frame.  Also tail(all_trips)
+str(all_trips)  #See list of columns and data types (numeric, character, etc)
+summary(all_trips)  #Statistical summary of data. Mainly for numerics
+
+
+# Verify that categorical variables are consistent and how many fall in each category
+# All values in member_casual should be either member or casual
+# All values in rideable type should be classic_bike, docked_bike or electric_bike
+table(all_trips$member_casual)
+table(all_trips$rideable_type)
+
+# Add a Column for trip duration (in seconds)
+all_trips$ride_length &lt;- all_trips$ended_at - all_trips$started_at
+
+# Convert ride_length to numeric so we can perform calculations with it
+all_trips$ride_length &lt;- as.numeric(all_trips$ride_length)
+
+# Remove invalid data 
+# Get summary of the column ride_length
+summary(all_trips$ride_length)
+
+# The minimum value of ride_length is negative. 
+# See how many rows there are where tip_duration is negative
+sum(all_trips$ride_length &lt; 0)
+
+# There are also 115280 rows where ride_length &lt; 60
+sum(all_trips$ride_length &lt; 60)
+
+# Remove all rows where trip duration &lt; 60 as they&#39;re most likely not real rides
+# Create a new data frame since data is being removed
+index &lt;- which(all_trips$ride_length &lt; 60)
+all_trips_v2 &lt;- all_trips[-c(index),]
+
+# Get a statistical summary of the column ride_length
+summary(all_trips_v2$ride_length) 
+
+# Now the minimum value is 60, but it seems to be another problem, the max value
+# seems way too high.
+
+# See first 100 rows ordered by highest to lowest trip duration
+all_trips_v2 %&gt;%
+  arrange(desc(ride_length)) %&gt;%
+  print(n = 100)
+
+# All results returned are for casual users and docked_bike
+# Get all rows where &quot;rideable_type&quot; is &quot;docked_bike&quot; and user is &quot;member&quot;
+all_trips_v2 %&gt;%
+  filter(member_casual == &quot;member&quot;, rideable_type == &quot;docked_bike&quot;) %&gt;%
+  arrange(desc(ride_length))
+
+# 0 rows returned. It seems that docked bikes are not included in the subscription
+# or for some other reason their rides in docked bikes are recorded as casual users.
+
+# Since this analysis is focused in the differences between members and casual 
+# users and there is no distinction between them when using docked bikes it&#39;s 
+# necessary to remove data about docked bikes
+index &lt;- which(all_trips_v2$rideable_type == &quot;docked_bike&quot;)
+all_trips_v2 &lt;- all_trips_v2[-c(index),]
+table(all_trips_v2$rideable_type)
+
+# Add columns that list the date, month, day, and year of each ride
+# This will allow aggregation of ride data for each hour, day, month or year
+# Before this it was only possible to aggregate at the ride level
+all_trips_v2$date &lt;- as.Date(all_trips_v2$started_at) #The default format is yyyy-mm-dd
+all_trips_v2$month &lt;- format(as.Date(all_trips_v2$date), &quot;%m&quot;)
+all_trips_v2$day &lt;- format(as.Date(all_trips_v2$date), &quot;%d&quot;)
+all_trips_v2$year &lt;- format(as.Date(all_trips_v2$date), &quot;%Y&quot;)
+all_trips_v2$day_of_week &lt;- format(as.Date(all_trips_v2$date), &quot;%A&quot;)
+all_trips_v2$hour &lt;- format(as.POSIXct(all_trips_v2$started_at), format = &quot;%H&quot;)
+
+# Export cleaned dataset to a csv file
+write.csv(all_trips_v2, file = &quot;cleaned_data.csv&quot;)</code></pre>
+<p><br> <br></p>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<pre class="r"><code># Load libraries
+library(tidyverse)
+library(lubridate)
+library(leaflet)
+library(viridis)
+library(nombre)
+library(ggpubr)
+
+# Set scipen so plots don&#39;t show in scientific notation 
+options(scipen = 1000000000)  
+
+# Load dataset
+cleaned_data &lt;- read.csv(&quot;/home/jeffer/Documents/Data Analysis Portfolio/Cyclistic_Case_Study/Data/cleaned_data.csv&quot;)
+
+# Descriptive analysis on ride_length (all figures in seconds)
+summary(cleaned_data$ride_length)
+
+# Compare members and casual users
+aggregate(cleaned_data$ride_length ~ cleaned_data$member_casual, FUN = mean)
+
+## Summarize by month
+df_month &lt;- cleaned_data %&gt;%
+  group_by(member_casual, month) %&gt;%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length)) %&gt;%
+  arrange(month) 
+
+# Create visualization for number of rides by month  
+vis_month &lt;- df_month %&gt;% 
+  ggplot(aes(reorder(month, (((as.integer(month) + 2) %% 12) + 1)), 
+             number_of_rides, 
+             fill = member_casual)) +
+  geom_col(position = &quot;dodge&quot;) +
+  labs(x = &quot;Month&quot;, y = &quot;Number of Rides&quot;) +
+  scale_fill_viridis(discrete = T) + 
+  scale_y_continuous(breaks = seq(25000, 450000, 50000)) + 
+  geom_vline(xintercept = 3.5) +
+  geom_text(aes(x = 3.5, y = 225000,  label = &quot;2022&quot;), 
+            angle = 90, size = 7, check_overlap = T, vjust = 1.2) +
+  theme_bw()
+
+# Create visualization for average duration of rides by month  
+vis_month2 &lt;- df_month %&gt;% 
+  ggplot(aes(reorder(month, (((as.integer(month) + 2) %% 12) + 1)), 
+             average_duration, 
+             fill = member_casual)) +
+  geom_col(position = &quot;dodge&quot;) +
+  labs(x = &quot;Month&quot;, y = &quot;Number of Rides&quot;) +
+  scale_fill_viridis(discrete = T) + 
+  geom_vline(xintercept = 3.5) +
+  geom_text(aes(x = 3.5, y = 1450,  label = &quot;2022&quot;), 
+            angle = 90, size = 7, check_overlap = T, vjust = 1.2) +
+  theme_bw()
+
+# Plot the two visualizations by month together 
+ggarrange(vis_month, vis_month2)
+
+## See the average ride time and number of rides by day of week for members vs casual users
+cleaned_data %&gt;%
+  group_by(member_casual, day_of_week) %&gt;%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length)) %&gt;%
+  arrange(day_of_week)
+
+# The days of the week are out of order. Let&#39;s fix that.
+# Convert &quot;day_of_week&quot; to ordered vector 
+cleaned_data$day_of_week &lt;- wday(cleaned_data$started_at, label = TRUE) 
+
+# Number of rides and average duration by day of week and rider type
+df_week &lt;- cleaned_data %&gt;%
+  group_by(member_casual, day_of_week) %&gt;%
+  summarise(number_of_rides = n(),
+            average_duration =  mean(ride_length),
+            total_duration = sum(ride_length)) %&gt;%
+  arrange(day_of_week) %&gt;%
+  ungroup() %&gt;%
+  mutate(number_of_rides_percent = (number_of_rides / sum(number_of_rides)))
+
+# Create table to use for plot legend
+totals &lt;- df_week %&gt;%
+  group_by(member_casual) %&gt;%
+  summarise(total = sum((number_of_rides_percent)))
+
+# Visualize number of rides by day of week and rider type
+vis_week &lt;- df_week %&gt;% 
+  ggplot(aes(x = day_of_week, y = number_of_rides_percent, 
+             fill = member_casual, color = member_casual)) +
+  geom_col(position = &quot;dodge&quot;) +
+  labs(x =&quot;Day of Week&quot;, y = &quot;Total Rides (percentage)&quot;) +
+  scale_y_continuous(breaks = seq(0.01,0.10, 0.01), 
+                     labels = scales::percent_format(scale = 100)) +
+  theme_bw() +
+  theme(legend.title = element_text(size = 15),
+        legend.text = element_text(size = 10)) +
+  ggtitle(&quot;Number of rides by day of week&quot;) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_viridis(discrete = T, 
+                      name = &quot;Total Rides (%)&quot;, 
+                      labels = paste(c(&quot;Casual:&quot;, &quot;Member:&quot;), 
+                                     scales::percent(totals$total))) +
+  scale_fill_viridis(discrete = T,
+                     name = &quot;Rider Type&quot;, labels=c(&#39;Casual&#39;, &#39;Member&#39;))
+
+# Visualize average duration by day of week and rider type
+vis_week2 &lt;- df_week %&gt;% 
+  ggplot(aes(x = day_of_week, y = average_duration, 
+             fill = member_casual, color = member_casual)) +
+  geom_col(position = &quot;dodge&quot;) +
+  xlab(&quot;Day of week&quot;) +
+  ylab(&quot;Average duration (seconds)&quot;) +
+  theme_bw() +
+  ggtitle(&quot;Average ride duration by day of week&quot;) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_viridis(discrete = T, 
+                      name = &quot;Total Rides (%)&quot;, 
+                      labels = paste(c(&quot;Casual:&quot;, &quot;Member:&quot;), 
+                                     scales::percent(totals$total))) +
+  scale_fill_viridis(discrete = T,
+                     name = &quot;Rider Type&quot;, labels=c(&#39;Casual&#39;, &#39;Member&#39;)) +
+  scale_y_continuous(breaks = seq(0, 1500, 250))
+
+# Plot the two visualizations by week together 
+ggarrange(vis_week2, vis_week, ncol=2, common.legend = TRUE, legend = &quot;bottom&quot;)  
+
+## Number of rides and average trip duration by rider type, hour and day of week
+df_hour &lt;- cleaned_data %&gt;%
+  group_by(member_casual, day_of_week, hour) %&gt;%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length),
+            total_duration= sum(ride_length)) %&gt;%
+  arrange(day_of_week, hour) %&gt;%
+  ungroup() %&gt;%
+  mutate(number_of_rides_percent = (number_of_rides/sum(number_of_rides)))
+
+# Create table to use for plot legend
+totals_hour &lt;- df_hour %&gt;%
+  filter(!(day_of_week %in% c(&quot;Sun&quot;,&quot;Sat&quot;))) %&gt;%
+  group_by(member_casual) %&gt;%
+  summarise(total = sum(number_of_rides_percent))
+
+# Create table to use for plot legend
+totals_hour2 &lt;- df_hour %&gt;%
+  filter(day_of_week %in% c(&quot;Sun&quot;,&quot;Sat&quot;)) %&gt;%
+  group_by(member_casual) %&gt;%
+  summarise(total = sum(number_of_rides_percent))
+
+# Visualize number of rides by user type and hour (Monday to Friday)
+vis_hour &lt;- df_hour %&gt;%
+  filter(!(day_of_week %in% c(&quot;Sun&quot;,&quot;Sat&quot;))) %&gt;%
+  ggplot(aes(x = hour, y = number_of_rides_percent, 
+             fill = member_casual, colour = member_casual)) +
+  scale_fill_viridis(discrete = T, name = &quot;Rider Type&quot;, 
+                     labels=c(&#39;Casual&#39;, &#39;Member&#39;)) +
+  scale_color_viridis(discrete = T,name = &quot;Total Rides (%)&quot;,
+                      labels = paste(c(&quot;Casual:&quot;, &quot;Member:&quot;), 
+                                     scales::percent(totals_hour$total))) +
+  labs(x =&quot;Hour&quot;, y = &quot;% of Total Week Rides&quot;) +
+  geom_col(position = &quot;dodge&quot;) +
+  scale_y_continuous(breaks = seq(0.001,0.10, 0.002), labels = 
+                       scales::percent_format(scale = 100)) +
+  theme_bw() +
+  ggtitle(&quot;Number of rides by hour (Monday to Friday)&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Visualize number of rides by user type and hour (Saturday and Sunday)
+vis_hour2 &lt;- df_hour %&gt;%
+  filter(day_of_week %in% c(&quot;Sun&quot;,&quot;Sat&quot;)) %&gt;%
+  ggplot(aes(x = hour, y = number_of_rides_percent, 
+             fill = member_casual, color = member_casual)) +
+  scale_fill_viridis(discrete = T, name = &quot;Rider Type&quot;, 
+                     labels=c(&#39;Casual&#39;, &#39;Member&#39;)) +
+  scale_color_viridis(discrete = T,name = &quot;Total Rides (%)&quot;,
+                      labels = paste(c(&quot;Casual:&quot;, &quot;Member:&quot;), 
+                                     scales::percent(totals_hour2$total))) +
+  labs(x =&quot;Hour&quot;, y = &quot;% of Total Week Rides&quot;) +
+  geom_col(position = &quot;dodge&quot;) +
+  scale_y_continuous(breaks = seq(0.001,0.10, 0.002), labels = 
+                       scales::percent_format(scale = 100)) +
+  theme_bw() +
+  ggtitle(&quot;Number of rides by hour (Saturday and Sunday)&quot;) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  guides(fill  = guide_legend(order = 1),
+         color = guide_legend(order = 2))
+
+# Plot visualizations by hour together
+ggarrange(vis_hour, vis_hour2, ncol = 1, common.legend = F, legend = &quot;bottom&quot;)
+
+## Number of rides and average duration by date
+df_date &lt;- cleaned_data %&gt;%
+  group_by(member_casual, date) %&gt;%
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length),
+            total_duration = sum(ride_length)) %&gt;%
+  arrange(date) 
+
+# Statistical summary of some values by rider type
+df_date %&gt;%
+  group_by(member_casual) %&gt;%
+  summarise(average_number_of_rides = mean(number_of_rides),
+            max_number_of_rides =  max(number_of_rides),
+            median_number_of_rides =  median(number_of_rides),
+            min_number_of_rides =  min(number_of_rides),
+            average_total_duration = mean(total_duration),
+            max_total_duration = max(total_duration),
+            min_total_duration = min(total_duration),
+            max_average_duration = max(average_duration),
+            min_average_duration = min(average_duration),
+            median_average_duration = median(average_duration))
+
+# See the days of the year with the highest number of rides
+df_date %&gt;%
+  arrange(-number_of_rides) %&gt;%
+  print(n=100)
+
+# Visualize boxplot for number of rides by rider type
+vis_date &lt;- df_date %&gt;%
+  ggplot(aes(member_casual, number_of_rides, fill = member_casual)) +
+  geom_boxplot(outlier.colour = &quot;blue&quot;) +
+  scale_fill_viridis(discrete = T, name = &quot;Rider Type&quot;,
+                     labels=c(&#39;Casual&#39;, &#39;Member&#39;)) +
+  labs(x = &quot;Rider Type&quot;, y = &quot;Number of Rides&quot;) +
+  stat_summary(fun = mean, geom = &quot;point&quot;, col = &quot;red&quot;) +
+  stat_summary(fun = mean, geom = &quot;text&quot;, col = &quot;red&quot;,  
+               vjust = 1.5, aes(label = paste(&quot;Mean:&quot;, round(..y.., digits = 1)))) +
+  scale_y_continuous(breaks = seq(0, 200000, 2500)) +
+  theme_bw() 
+
+## Use of different bike types by rider type
+bikes &lt;- cleaned_data %&gt;%
+  group_by(member_casual, rideable_type) %&gt;%
+  summarise(number_of_rides = n(), 
+            average_duration = mean(ride_length),
+            total_duration = sum(ride_length)) %&gt;%
+  arrange(member_casual)
+
+# Visualize number of rides by bike type for members
+vis_bikes &lt;- bikes %&gt;%
+  filter(member_casual == &quot;member&quot;) %&gt;%
+  mutate(number_of_rides_percent = number_of_rides / sum(number_of_rides)) %&gt;%
+  ggplot(aes(x =&quot;&quot;, y = number_of_rides, fill = rideable_type)) +
+  geom_bar(stat=&quot;identity&quot;, width = 1) +
+  scale_fill_viridis(discrete = T, name = &quot;Bike Type&quot;, 
+                     labels=c(&#39;Classic&#39;, &#39;Electric&#39;)) +
+  coord_polar(&quot;y&quot;, start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(number_of_rides_percent)),
+            colour = c(&quot;white&quot;,&quot;black&quot;),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle(&quot;Members&quot;) +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+# Visualize number of rides by bike type for casual riders
+vis_bikes2 &lt;- bikes %&gt;%
+  filter(member_casual == &quot;casual&quot;) %&gt;%
+  mutate(number_of_rides_percent = number_of_rides / sum(number_of_rides)) %&gt;%
+  ggplot(aes(x =&quot;&quot;, y = number_of_rides, fill = rideable_type)) +
+  geom_bar(stat=&quot;identity&quot;, width = 1) +
+  scale_fill_viridis(discrete = T, name = &quot;Bike Type&quot;, 
+                     labels=c(&#39;Classic&#39;, &#39;Electric&#39;)) +
+  coord_polar(&quot;y&quot;, start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(number_of_rides_percent)),
+            colour = c(&quot;white&quot;,&quot;black&quot;),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle(&quot;Casual Users&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Visualize total use (in seconds) by bike type for members
+vis_bikesx &lt;- bikes %&gt;%
+  filter(member_casual == &quot;member&quot;) %&gt;%
+  mutate(total_duration_percent = total_duration / sum(total_duration)) %&gt;%
+  ggplot(aes(x =&quot;&quot;, y = total_duration, fill = rideable_type)) +
+  geom_bar(stat=&quot;identity&quot;, width = 1) +
+  scale_fill_viridis(discrete = T, name = &quot;Bike Type&quot;, 
+                     labels=c(&#39;Classic&#39;, &#39;Electric&#39;)) +
+  coord_polar(&quot;y&quot;, start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(total_duration_percent)),
+            colour = c(&quot;white&quot;,&quot;black&quot;),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle(&quot;Members&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Visualize total use (in seconds) by bike type for casual riders
+vis_bikesx2 &lt;- bikes %&gt;%
+  filter(member_casual == &quot;casual&quot;) %&gt;%
+  mutate(total_duration_percent = total_duration / sum(total_duration)) %&gt;%
+  ggplot(aes(x =&quot;&quot;, y = total_duration, fill = rideable_type)) +
+  geom_bar(stat=&quot;identity&quot;, width = 1) +
+  scale_fill_viridis(discrete = T, name = &quot;Bike Type&quot;, 
+                     labels=c(&#39;Classic&#39;, &#39;Electric&#39;)) +
+  coord_polar(&quot;y&quot;, start=0) +
+  theme_void() +
+  geom_text(aes(label = scales::percent(total_duration_percent)),
+            colour = c(&quot;white&quot;,&quot;black&quot;),
+            position = position_stack(vjust = 0.5)) +
+  ggtitle(&quot;Casual Users&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Arrange both visualizations for number of rides by bike together and add a title
+p &lt;- ggarrange(vis_bikes, vis_bikes2, ncol = 2, legend = &quot;none&quot;) %&gt;%
+  annotate_figure(top = text_grob(&quot;Number of rides by bike type (%)&quot;,
+                                  size = 14))
+
+# Arrange both visualizations for total duration by bike together and add a title
+p2 &lt;- ggarrange(vis_bikesx, vis_bikesx2, ncol = 2, 
+                common.legend = TRUE, legend = &quot;bottom&quot;) %&gt;%
+  annotate_figure(top = text_grob(&quot;Total trip time by bike type (%)&quot;,
+                                  size = 14))
+
+# Plot visualizations by bike type
+ggarrange(p, p2, ncol = 1)
+
+## Visualize most popular routes
+routes &lt;- cleaned_data %&gt;%
+  mutate(route = paste(start_station_name, &quot;-&quot;, end_station_name)) %&gt;%
+  group_by(route, member_casual) %&gt;%
+  summarise(total = n()) %&gt;%
+  arrange(desc(total)) %&gt;%
+  ungroup()
+
+# Rows 1 and 2 are &quot;NA - NA&quot; so this rides don&#39;t have a start nor end station 
+sum(routes$total[c(1,2)]) / nrow(cleaned_data) * 100
+# 8.54% of rides don&#39;t have a start station name nor end station name
+
+# Remove those 2 rows
+routes &lt;- routes[-c(1, 2),]
+
+# Create a column with the sum of the number of rides for members and casual 
+# riders by station
+routes &lt;- routes %&gt;%
+  group_by(route) %&gt;%
+  mutate(total_total = sum(total)) %&gt;%
+  arrange(-total_total)
+  
+# Visualize 10 most popular routes by number of rides 
+vis_routes &lt;- routes %&gt;%
+  ungroup() %&gt;%
+  head(20) %&gt;%
+  ggplot(aes(y = route,
+             x = total, fill = total,
+             alpha = member_casual,
+             color = member_casual,
+             group = member_casual)) +
+  geom_col() +
+  scale_fill_viridis(discrete = F, begin = 0.20, end = 0.75, direction = -1,
+                     name = &quot;Total&quot;) +
+  scale_color_viridis(option = &quot;D&quot;, discrete = T, begin = 0, end = 1,
+                      name = &quot;Rider Type&quot;, labels=c(&#39;Casual&#39;, &#39;Member&#39;)) +
+  scale_y_discrete(limits = unique(routes$route[seq(20, 1)])) +
+  scale_alpha_manual(values=c(0.6, 1), name = &quot;Rider Type&quot;,
+                     labels=c(&#39;Casual&#39;, &#39;Member&#39;)) +
+  theme_bw() + 
+  ggtitle(&quot;Most popular routes&quot;) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = &quot;Number of rides&quot;, y = &quot;Route&quot;)
+
+vis_routes
+
+## Create Map with stations by number of rides
+
+# Create dataframe with the number of rides by station and their locations
+map_data &lt;- cleaned_data %&gt;%
+  group_by(start_station_name) %&gt;%
+  arrange(date) %&gt;%
+  summarise(lng = first(start_lng),
+            lat = first(start_lat), 
+            first_ride = first(date),
+            number_of_rides = n()) %&gt;%
+  arrange(-number_of_rides) 
+
+map_data
+
+# Remove first column (NA)
+map_data &lt;- map_data[-1,]
+
+# Create dataframe with the number of rides by station and their locations 
+# including only rides from members. Will be used for labels
+map_data_member &lt;- cleaned_data %&gt;%
+  filter(member_casual == &quot;member&quot;) %&gt;%
+  group_by(start_station_name, member_casual) %&gt;%
+  arrange(date) %&gt;%
+  summarise(lng = first(start_lng),
+            lat = first(start_lat), 
+            number_of_rides = n()) %&gt;%
+  arrange(-number_of_rides) 
+
+# Create dataframe with the number of rides by station and their locations 
+# including only rides from casual riders. Will be used for labels
+map_data_casual &lt;- cleaned_data %&gt;%
+  filter(member_casual == &quot;casual&quot;) %&gt;%
+  group_by(start_station_name, member_casual) %&gt;%
+  arrange(date) %&gt;%
+  summarise(lng = first(start_lng),
+            lat = first(start_lat), 
+            number_of_rides = n()) %&gt;%
+  arrange(-number_of_rides) 
+
+# Create labels to be used on the map
+labels &lt;- paste(
+  &quot;&lt;strong&gt;&quot;, map_data$start_station_name, 
+  &quot;&lt;/strong&gt;&lt;br&gt;Number of Rides:&quot;, map_data$number_of_rides,
+  &quot;&lt;/strong&gt;&lt;br&gt;Number of Rides (Casual):&quot;, scales::percent(
+    map_data_casual$number_of_rides[
+      match(map_data$start_station_name, map_data_casual$start_station_name)]
+    / map_data$number_of_rides, accuracy = 4),
+  &quot;&lt;/strong&gt;&lt;br&gt;Number of Rides (Member):&quot;, scales::percent(
+    map_data_member$number_of_rides[
+      match(map_data$start_station_name, map_data_member$start_station_name)] 
+    / map_data$number_of_rides, accuracy = 4),
+  &quot;&lt;/strong&gt;&lt;br&gt;&quot;, nom_ord(which(map_data$start_station_name == 
+                                   map_data$start_station_name), cardinal = F),
+  &quot;Station by number of rides&quot;,
+  &quot;&lt;/strong&gt;&lt;br&gt;First Ride in Time Period:&quot;, map_data$first_ride
+) %&gt;%
+  lapply(htmltools::HTML)
+
+# Set domain and color palette viridis. reverse = T to make higher values darker 
+pal &lt;- colorNumeric(
+  palette = &#39;viridis&#39;,
+  domain = seq(10, 64010, 1000),
+  reverse = T)
+
+# Create map
+map &lt;- leaflet(map_data) %&gt;% 
+  setView(lng = -87.623177, lat = 41.881832, zoom = 11) %&gt;%
+  addCircleMarkers(radius = ~sqrt(sqrt(number_of_rides)), 
+                   label = ~labels,
+                   color = ~pal(number_of_rides)) %&gt;% 
+  addMarkers(data = head(map_data, 10),
+             label = head(labels, 10)) %&gt;%
+  addTiles() %&gt;%
+  addLegend(&quot;topright&quot;,
+            pal = pal, 
+            values = c(seq(10, 64010, 1000), NA),
+            title = &quot;Number of Rides&quot;,
+            na.label = &quot;&lt;10&quot;,
+            labels = c(&quot;blue&quot;, &quot;red&quot;, &quot;green&quot;,&quot;pink&quot;),
+            opacity = 1,)
+
+map
+
+# There is a warning saying some values will be treated as NA, this is expected.
+# NA values will be used to show stations with less than 10 rides with other color.
+# NA not showing correctly in the legend
+css_fix &lt;- &quot;div.info.legend.leaflet-control br {clear: both;}&quot; # CSS to correct spacing
+html_fix &lt;- htmltools::tags$style(type = &quot;text/css&quot;, css_fix)  # Convert CSS to HTML
+map %&gt;% htmlwidgets::prependContent(html_fix)                  # Insert into leaflet HTML code</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

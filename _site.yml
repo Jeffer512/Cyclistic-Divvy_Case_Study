@@ -1,0 +1,14 @@
+name: "Cyclistic Case Study"
+navbar:
+  title: "Cyclistic Case Study"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Final Report"
+      href: Final_Report.html
+    - text: "Code"
+      href: Code.html
+output_dir: "docs"
+output:
+  html_document:
+    theme: flatly
